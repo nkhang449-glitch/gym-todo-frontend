@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gym ToDo</string>
+    <string name="title_activity_main">Gym ToDo</string>
+    <string name="package_name">com.gymtodo.app</string>
+    <string name="custom_url_scheme">com.gymtodo.app</string>
+</resources>
