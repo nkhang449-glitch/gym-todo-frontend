@@ -39,12 +39,12 @@ export default function TemplateSection({ templates, onCreateClick, onEditClick,
                 </div>
               </div>
               <ul className="text-xs text-slate-400 space-y-1">
-                {tpl.exercises?.map((ex, idx) => (
-                  <li key={idx}>
-                    • <strong className="text-slate-300">{ex.exerciseName}</strong> ({ex.defaultSets} sets x {ex.defaultReps} reps {ex.defaultWeight ? `@ ${ex.defaultWeight}kg` : ''})
-                  </li>
-                ))}
-              </ul>
+  {tpl.exercises?.map((ex, idx) => (
+    <li key={idx}>
+      • <strong className="text-slate-300">{ex.exerciseName}</strong> ({ex.defaultSets} sets x {ex.defaultReps} reps {ex.defaultWeight ? `- ${ex.defaultWeight}kg` : ''})
+    </li>
+  ))}
+</ul>
             </div>
           ))
         )}
