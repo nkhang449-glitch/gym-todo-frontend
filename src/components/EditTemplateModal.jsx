@@ -5,9 +5,12 @@ export default function EditTemplateModal({ template, onClose, onSubmit }) {
   const [exercises, setExercises] = useState(
     template.exercises?.map(ex => ({
       exerciseName: ex.exerciseName || '',
+      type: ex.type || (ex.duration || ex.distance ? 'cardio' : ex.defaultWeight > 0 ? 'weight' : 'bodyweight'),
       defaultSets: String(ex.defaultSets ?? 3),
       defaultReps: String(ex.defaultReps ?? 10),
-      defaultWeight: String(ex.defaultWeight ?? 0)
+      defaultWeight: String(ex.defaultWeight ?? 0),
+      duration: String(ex.duration ?? 0),
+      distance: String(ex.distance ?? 0)
     })) || []
   );
 
@@ -15,9 +18,12 @@ export default function EditTemplateModal({ template, onClose, onSubmit }) {
     e.preventDefault();
     const formattedExercises = exercises.map(ex => ({
       exerciseName: ex.exerciseName,
+      type: ex.type || 'weight',
       defaultSets: Number(ex.defaultSets) || 1,
       defaultReps: Number(ex.defaultReps) || 0,
-      defaultWeight: Number(ex.defaultWeight) || 0
+      defaultWeight: ex.type === 'weight' ? (Number(ex.defaultWeight) || 0) : 0,
+      duration: ex.type === 'cardio' ? (Number(ex.duration) || 0) : 0,
+      distance: ex.type === 'cardio' ? (Number(ex.distance) || 0) : 0
     }));
     onSubmit(template._id, { name, exercises: formattedExercises });
   };
@@ -31,7 +37,7 @@ export default function EditTemplateModal({ template, onClose, onSubmit }) {
   const handleAddExercise = () => {
     setExercises([
       ...exercises,
-      { exerciseName: '', defaultSets: '3', defaultReps: '10', defaultWeight: '0' }
+      { exerciseName: '', type: 'weight', defaultSets: '3', defaultReps: '10', defaultWeight: '0', duration: '0', distance: '0' }
     ]);
   };
 
@@ -56,7 +62,7 @@ export default function EditTemplateModal({ template, onClose, onSubmit }) {
             />
           </div>
 
-          <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
             {exercises.map((ex, idx) => (
               <div key={idx} className="bg-slate-900 p-3 rounded-xl space-y-2 border border-slate-700 relative">
                 <div className="flex justify-between items-center">
@@ -72,52 +78,121 @@ export default function EditTemplateModal({ template, onClose, onSubmit }) {
                   )}
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Tên bài tập"
-                  required
-                  className="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-100"
-                  value={ex.exerciseName}
-                  onChange={(e) => handleExerciseChange(idx, 'exerciseName', e.target.value)}
-                />
-
+                {/* Chọn Tên bài & Loại bài tập */}
                 <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Sets</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
-                      value={ex.defaultSets}
-                      onChange={(e) => handleExerciseChange(idx, 'defaultSets', e.target.value)}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Tên bài tập"
+                    required
+                    className="col-span-2 bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-100"
+                    value={ex.exerciseName}
+                    onChange={(e) => handleExerciseChange(idx, 'exerciseName', e.target.value)}
+                  />
 
-                  <div>
-                    <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Reps</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
-                      value={ex.defaultReps}
-                      onChange={(e) => handleExerciseChange(idx, 'defaultReps', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Mức tạ (kg)</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
-                      value={ex.defaultWeight}
-                      onChange={(e) => handleExerciseChange(idx, 'defaultWeight', e.target.value)}
-                    />
-                  </div>
+                  <select
+                    className="bg-slate-800 border border-slate-700 rounded p-1.5 text-[11px] text-emerald-400 font-semibold focus:outline-none"
+                    value={ex.type}
+                    onChange={(e) => handleExerciseChange(idx, 'type', e.target.value)}
+                  >
+                    <option value="weight">🏋️ Tập Tạ</option>
+                    <option value="bodyweight">🤸 Thể Lực (No Kg)</option>
+                    <option value="cardio">🏃 Cardio / Chạy</option>
+                  </select>
                 </div>
+
+                {/* Ô nhập tương ứng theo Loại bài tập */}
+                {ex.type === 'weight' && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Sets</label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.defaultSets}
+                        onChange={(e) => handleExerciseChange(idx, 'defaultSets', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Reps</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.defaultReps}
+                        onChange={(e) => handleExerciseChange(idx, 'defaultReps', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Mức tạ (kg)</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.defaultWeight}
+                        onChange={(e) => handleExerciseChange(idx, 'defaultWeight', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {ex.type === 'bodyweight' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Sets</label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.defaultSets}
+                        onChange={(e) => handleExerciseChange(idx, 'defaultSets', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Số Reps / Lần</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.defaultReps}
+                        onChange={(e) => handleExerciseChange(idx, 'defaultReps', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {ex.type === 'cardio' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Thời gian (Phút)</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.duration}
+                        onChange={(e) => handleExerciseChange(idx, 'duration', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-0.5 text-center">Quãng đường (Km)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        required
+                        min="0"
+                        className="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-center text-emerald-400 font-bold"
+                        value={ex.distance}
+                        onChange={(e) => handleExerciseChange(idx, 'distance', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
