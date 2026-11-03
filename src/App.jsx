@@ -6,6 +6,7 @@ import WeeklySchedule from './components/WeeklySchedule';
 import StatsSection from './components/StatsSection'; // Import thêm Stats
 import CreateTemplateModal from './components/CreateTemplateModal';
 import EditDayLogModal from './components/EditDayLogModal';
+import EditTemplateModal from './components/EditTemplateModal';
 
 const DAYS_OF_WEEK = [
   { key: 'Monday', label: 'Thứ 2' },
@@ -26,6 +27,7 @@ export default function App() {
   const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
   const [editingLog, setEditingLog] = useState(null);
   const [refreshStats, setRefreshStats] = useState(0); // Trigger để reload thống kê
+  const [editingTemplate, setEditingTemplate] = useState(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('gym_user');
@@ -129,6 +131,16 @@ export default function App() {
     }
   };
 
+  const handleUpdateTemplate = async (templateId, updatedData) => {
+    try {
+      await axiosClient.put(`/templates/${templateId}`, updatedData);
+      setEditingTemplate(null);
+      fetchTemplates();
+    } catch (err) {
+      alert('Không thể cập nhật kiểu tập mẫu!');
+    }
+  };
+
   const handleDeleteTemplate = async (id) => {
     if (confirm('Xóa kiểu tập mẫu này?')) {
       try {
@@ -158,11 +170,21 @@ export default function App() {
         </header>
 
         {/* 1. Phần Quản Lý Templates */}
-        <TemplateSection
-          templates={templates}
-          onCreateClick={() => setShowCreateTemplateModal(true)}
-          onDeleteTemplate={handleDeleteTemplate}
+       <TemplateSection
+        templates={templates}
+        onCreateClick={() => setShowCreateTemplateModal(true)}
+        onEditClick={(tpl) => setEditingTemplate(tpl)}
+        onDeleteTemplate={handleDeleteTemplate}
+      />
+
+      {/* Render Modal Sửa Template */}
+      {editingTemplate && (
+        <EditTemplateModal
+          template={editingTemplate}
+          onClose={() => setEditingTemplate(null)}
+          onSubmit={handleUpdateTemplate}
         />
+        )}
 
         {/* 2. Phần Thời Khóa Biểu Hàng Tuần */}
         <WeeklySchedule
@@ -175,6 +197,8 @@ export default function App() {
           onEditLog={setEditingLog}
           onDeleteLog={handleDeleteLog}
         />
+
+
 
         {/* 3. Phần Thống Kê Tiến Độ (Mới) */}
         <StatsSection userId={user._id} refreshTrigger={refreshStats} />
