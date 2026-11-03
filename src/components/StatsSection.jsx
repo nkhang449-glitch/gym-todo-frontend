@@ -82,10 +82,13 @@ export default function StatsSection({ userId, refreshTrigger }) {
         </div>
 
         <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700/50">
-          <span className="text-xs text-slate-400 font-semibold">Khối Lượng Tải (Volume)</span>
+          <span className="text-xs text-slate-400 font-semibold">Tổng Khối Lượng Tích Lũy</span>
           <div className="text-2xl font-black text-emerald-400 mt-1">
-            {loading ? '...' : (stats?.totalVolume || 0).toLocaleString()} <span className="text-xs font-normal text-slate-400">kg</span>
+            {loading ? '...' : (stats?.totalVolumeDisplay || `${(stats?.totalVolume || 0).toLocaleString()} kg`)}
           </div>
+          {stats?.avgWeight && (
+            <span className="text-[10px] text-slate-500">Tạ trung bình: {stats.avgWeight}/rep</span>
+          )}
         </div>
 
         <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700/50">
@@ -114,7 +117,9 @@ export default function StatsSection({ userId, refreshTrigger }) {
               <div key={idx} className="bg-slate-900/90 p-3 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div>
                   <div className="text-xs font-bold text-slate-200">{pr.exerciseName}</div>
-                  <div className="text-[10px] text-slate-400">Tổng Vol: {pr.totalVol.toLocaleString()} kg</div>
+                  <div className="text-[10px] text-slate-400">
+                    Tổng Vol: {typeof pr.totalVol === 'number' ? `${pr.totalVol.toLocaleString()} kg` : pr.totalVol}
+                  </div>
                 </div>
                 <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold text-sm px-2.5 py-1 rounded-lg">
                   {pr.maxWeight} kg
